@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>암호 복호화 통합기</title>
+</head>
+<body>
+
+<h1>🔐 암호 복호화 통합 프로그램</h1>
+
+<hr><br>
+
+<!-- ========================================= -->
+<!-- 1) 고정 key 입력 시저 암호 복호화 -->
+<!-- ========================================= -->
+<h2>1) 키 기반 시저 복호화(김영진)</h2>
+
+<label>암호화된 문자열:</label><br>
+<input type="text" id="coded" style="width:400px;"><br><br>
+
+<label>각 문자에 적용된 key (공백으로 구분):</label><br>
+<input type="text" id="key" style="width:400px;" placeholder="예: 3 1 2 4 0"><br><br>
+
+<button onclick="decodeKey()">복호화하기</button>
+
+<h3>결과:</h3>
+<div id="result_key" style="font-size:20px; font-weight:bold;"></div>
+
+
+
+<br><hr><br>
+
+<!-- ========================================= -->
+<!-- 2) 가변 시저 암호 복호화 (move(i) 기반) -->
+<!-- ========================================= -->
+<h2>2) 가변 시저 복호화(백승찬)</h2>
+
+<label>암호문:</label><br>
+<input type="text" id="cipher" style="width:400px;"><br><br>
+
+<button onclick="testDecrypt()">복호화하기</button>
+
+<h3>결과:</h3>
+<div id="result_var" style="font-size:20px; font-weight:bold;"></div>
+
+
+<script>
+/* -------------------------------------------------
+   1) 키 기반 시저 복호화 (처음에 만들어준 버전)
+----------------------------------------------------*/
+function decodeKey() {
+    const coded = document.getElementById("coded").value;
+    const coded_list = coded.split("");
+
+    const key = document.getElementById("key").value.split(" ").map(Number);
+
+    let decoded = [];
+
+    for (let i = 0; i < coded_list.length; i++) {
+        let j = coded_list[i];
+        let shift = key[i];
+
+        if (/[A-Z]/.test(j)) {
+            let origin = 'A'.charCodeAt(0);
+            let k = String.fromCharCode(((j.charCodeAt(0) - origin - shift) % 26 + 26) % 26 + origin);
+            decoded.push(k);
+        }
+        else if (/[a-z]/.test(j)) {
+            let origin = 'a'.charCodeAt(0);
+            let k = String.fromCharCode(((j.charCodeAt(0) - origin - shift) % 26 + 26) % 26 + origin);
+            decoded.push(k);
+        }
+        else if (/[0-9]/.test(j)) {
+            let k = ((parseInt(j) - shift) % 10 + 10) % 10;
+            decoded.push(k.toString());
+        }
+        else {
+            decoded.push(j);
+        }
+    }
+
+    document.getElementById("result_key").innerText = decoded.join("");
+}
+
+
+
+/* -------------------------------------------------
+   2) 가변 시저 암호 복호화 (move(i) 기반)
+   (두 번째로 요청했던 버전)
+----------------------------------------------------*/
+function move(i) {
+    return (Math.floor(Math.abs(Math.sin(i) * 10)) + i * i) % 26;
+}
+
+function decrypt(ciphertext) {
+    let original = "";
+
+    for (let i = 0; i < ciphertext.length; i++) {
+        let ch = ciphertext[i];
+
+        if (/[A-Za-z]/.test(ch)) {
+            let base = ch >= 'A' && ch <= 'Z' ? 'A'.charCodeAt(0) : 'a'.charCodeAt(0);
+            let shift = move(i);
+            let code = ((ch.charCodeAt(0) - base - shift) % 26 + 26) % 26 + base;
+            original += String.fromCharCode(code);
+        } else {
+            original += ch;
+        }
+    }
+
+    return original;
+}
+
+function testDecrypt() {
+    const cipher = document.getElementById("cipher").value;
+    const result = decrypt(cipher);
+
+    document.getElementById("result_var").innerText = result;
+}
+</script>
+
+</body>
+</html>
